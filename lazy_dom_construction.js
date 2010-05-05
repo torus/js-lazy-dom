@@ -1,3 +1,7 @@
+// -*- indent-tabs-mode: nil -*-
+// JScript
+// Usage: cscript genmxml.js
+
 function E_ (name, attrs) {
     var children = [];
     for (var i = 2; i < arguments.length; i ++) {
@@ -21,7 +25,8 @@ function E_ (name, attrs) {
                             f (c[i]);
                         }
                     } else {
-                        elem.textContent += c;
+                        var cont = doc.createTextNode (c);
+                        elem.appendChild (cont);
                     }
                 }
                 f (c);
@@ -31,8 +36,12 @@ function E_ (name, attrs) {
     }
 }
 
-function test_E () {
-    var elem = E_ ("root", {}, E_ ("hoge", {a: "abc", b: 123}, E_ ("fuga", {}, "c<><>ontent")));
+function test_WSH () {
+    var doc = WScript.CreateObject ("MSXML.DOMDocument");
+    var content = E_ ("root", {abc: "1234"}, E_ ("hoge", {}, "text"));
+    doc.appendChild (content (doc));
 
-    debugout (elem (document).innerHTML);
+    WScript.echo (doc.xml);
 }
+
+test_WSH ();
