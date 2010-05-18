@@ -1,6 +1,5 @@
 // -*- indent-tabs-mode: nil -*-
-// JScript
-// Usage: cscript genmxml.js
+// Works on both WSH and Gecko
 
 function E_ (name, attrs) {
     var children = [];
@@ -44,4 +43,4 @@ function test_WSH () {
     WScript.echo (doc.xml);
 }
 
-test_WSH ();
+//test_WSH ();
