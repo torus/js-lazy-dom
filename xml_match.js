@@ -9,12 +9,12 @@ function xmlmatch_test_main () {
 
         console.debug (elem);
 
-        var eat_c1 = M ("c1", function (c) {console.debug (c.textContent == "cont c1" && "GOOD!");});
-        var eat_c2 = M ("c2");
-        var eat_c31 = M ("c31");
-        var eat_c32 = M ("c32");
-        var eat_c3 = M ("c3", concat (eat_c31, eat_c32));
-        var eat_root = M ("root", C (eat_c1, eat_c2, eat_c3));
+        var eat_root =
+            M ("root",
+               C (M ("c1", function (c) {console.assert (c.textContent == "cont c1"); return true}),
+                  M ("c2"),
+                  M ("c3", concat (M ("c31", function (c) {console.debug (c); return true;}),
+                                   M ("c32", function (c) {console.debug (c); return true;})))));
 
         var ret = eat_root (elem);
 
@@ -54,7 +54,8 @@ xmlmatch.concat = function () {
 xmlmatch.star = function (p) {
     return function (elem) {
         for (var c = elem.firstChild; c; c = c.nextSibling) {
-            p (c);
+            if (! p (c))
+                return false;
         }
 
         return true;
