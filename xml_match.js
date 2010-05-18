@@ -9,12 +9,12 @@ function xmlmatch_test_main () {
 
         console.debug (elem);
 
-        var eat_c1 = eat_tag_func ("c1", function (c) {console.debug (c.textContent);});
-        var eat_c2 = eat_tag_func ("c2");
-        var eat_c31 = eat_tag_func ("c31");
-        var eat_c32 = eat_tag_func ("c32");
-        var eat_c3 = eat_tag_func ("c3", concatenate (eat_c31, eat_c32));
-        var eat_root = eat_tag_func ("root", star (alternate (eat_c1, eat_c2, eat_c3)));
+        var eat_c1 = M ("c1", function (c) {console.debug (c.textContent == "cont c1" && "GOOD!");});
+        var eat_c2 = M ("c2");
+        var eat_c31 = M ("c31");
+        var eat_c32 = M ("c32");
+        var eat_c3 = M ("c3", concat (eat_c31, eat_c32));
+        var eat_root = M ("root", C (eat_c1, eat_c2, eat_c3));
 
         var ret = eat_root (elem);
 
@@ -24,7 +24,7 @@ function xmlmatch_test_main () {
 
 xmlmatch = {};
 
-xmlmatch.alternate = function () {
+xmlmatch.alter = function () {
     var options = arguments;
 
     return function (c) {
@@ -37,9 +37,9 @@ xmlmatch.alternate = function () {
 
         return false;
     };
-}
+};
 
-xmlmatch.concatenate = function () {
+xmlmatch.concat = function () {
     var seq = arguments;
 
     return function (elem) {
@@ -49,7 +49,7 @@ xmlmatch.concatenate = function () {
         }
         return true;
     };
-}
+};
 
 xmlmatch.star = function (p) {
     return function (elem) {
@@ -59,16 +59,35 @@ xmlmatch.star = function (p) {
 
         return true;
     }
-}
+};
 
-xmlmatch.eat_tag_func = function (tagname, p) {
+xmlmatch.children = function () {
+    return xmlmatch.star (xmlmatch.alter.apply (this, arguments));
+};
+
+xmlmatch.matcher = function (tagname) {
+    var procs = arguments;
     return function (e) {
         if (e.tagName.toLowerCase () != tagname) {
+            // console.debug (e.tagName.toLowerCase (), "!=", tagname);
+
             return false;
         }
 
         console.debug ("eating " + tagname);
 
-        return p ? p (e) : true;
+        for (var i = 1; i < procs.length; i ++) {
+            var p = procs[i];
+            if (p) {
+                var ret = p (e);
+                if (! ret)
+                    return false;
+            }
+        }
+
+        return true;
     }
-}
+};
+
+xmlmatch.M = xmlmatch.matcher;
+xmlmatch.C = xmlmatch.children;
